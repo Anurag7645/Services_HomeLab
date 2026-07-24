@@ -6,7 +6,7 @@ All of my services running on my home lab and the related documents to it.
 Running on docker using compose. All of the configurations and the file itself is included in this repo.
 
 The stack is configured usnig the /data as the root folder and the structre as follows (neccessary for the jellyfin service to read and use the contents).
-
+```sh
 /data/
 ├── docker-compose.yml
 ├── media
@@ -25,3 +25,4 @@ The stack is configured usnig the /data as the root folder and the structre as f
     ├── music
     ├── prowlarr
     └── tv
+```
