@@ -1,0 +1,212 @@
+###############################################
+# Common Keys for all apps
+###############################################
+
+x-common-keys: &common-keys
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Kolkata
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+
+services:
+###############################################
+# RADARR - Movies
+###############################################
+  radarr:
+    <<: *common-keys
+    container_name: radarr
+    image: ghcr.io/hotio/radarr:latest
+    ports:
+      - 7878:7878
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/radarr:/config
+      - /data:/data
+    networks:
+      - default
+      - homelab
+
+###############################################
+# SONARR - TV Shows
+###############################################
+
+  sonarr:
+    <<: *common-keys
+    container_name: sonarr
+    image: ghcr.io/hotio/sonarr:latest
+    ports:
+      - 8989:8989
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/sonarr:/config
+      - /data:/data
+    networks:
+      - default
+      - homelab
+
+###############################################
+# LIDARR - Music
+###############################################
+
+  lidarr:
+    <<: *common-keys
+    container_name: lidarr
+    image: ghcr.io/hotio/lidarr:latest
+    ports:
+      - 8686:8686
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/lidarr:/config
+      - /data:/data
+    networks:
+      - default
+      - homelab
+
+###############################################
+# BAZARR - Subtitles
+###############################################
+
+#  bazarr:
+ #   <<: *common-keys
+  #  container_name: bazarr
+   # image: ghcr.io/hotio/bazarr:latest
+   # ports:
+    #  - 6767:6767
+   # volumes:
+    #  - /etc/localtime:/etc/localtime:ro
+     # - /docker/appdata/bazarr:/config
+      #- /data/media:/data/media
+
+###############################################
+# QUESTARR - Quest Management
+###############################################
+
+#  questarr:
+ #   <<: *common-keys
+  #  container_name: questarr
+   # image: ghcr.io/doezer/questarr:latest
+    #ports:
+     # - 5000:5000
+   # volumes:
+    #  - /etc/localtime:/etc/localtime:ro
+    #  - /docker/appdata/questarr:/app/data
+    #environment:
+    #  - SQLITE_DB_PATH=/app/data/sqlite.db
+    #  - PUID=1000
+    #  - PGID=1000
+    #  - TZ=Asia/Kolkata
+
+###############################################
+# PROWLARR - Indexer Manager
+###############################################
+
+  prowlarr:
+    <<: *common-keys
+    container_name: prowlarr
+    image: ghcr.io/hotio/prowlarr:latest
+    ports:
+      - 9696:9696
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/prowlarr:/config
+    networks:
+      - default
+      - homelab
+
+###############################################
+# FLARESOLVERR - Proxy to bypass Cloudflare
+###############################################
+
+  flaresolverr:
+    <<: *common-keys
+    container_name: flaresolverr
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+    ports:
+      - "${PORT:-8191}:8191"
+    networks:
+      - default
+      - homelab
+
+###############################################
+# QBITTORRENT - Downloader
+###############################################
+
+  qbittorrent:
+    <<: *common-keys
+    container_name: qbittorrent
+    image: ghcr.io/hotio/qbittorrent:latest
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    environment:
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/qbittorrent:/config
+      - /data:/data
+    networks:
+      - default
+      - homelab
+
+###############################################
+# JELLYFIN - Media Server
+###############################################
+
+  jellyfin:
+    <<: *common-keys
+    container_name: jellyfin
+    image: ghcr.io/hotio/jellyfin:latest
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker/appdata/jellyfin:/config
+      - /data/media:/data/media:ro #read-only
+    ports:
+      - 8096:8096
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+    group_add:
+      - "993" # This is usually the 'render' group GID on Ubuntu
+    networks:
+      - default
+      - homelab
+
+###############################################
+# UPTIME KUMA - Observability Dashboard
+###############################################
+
+  #uptime-kuma:
+  #  <<: *common-keys
+  #  container_name: uptime-kuma
+  #  image: louislam/uptime-kuma:1
+  #  volumes:
+  #    - /etc/localtime:/etc/localtime:ro
+  #    - /docker/appdata/uptime-kuma:/app/data
+  #  ports:
+  #    - 3001:3001
+
+###############################################
+# ARR Stack Dedicated Network
+###############################################
+
+networks:
+  default:
+    name: arr_network
+
+  homelab:
+    external: true
+
+###############################################
+###############################################
